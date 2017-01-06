@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>ChatIO</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+</head>
+<body>
+
+  <div class="container">
+    <div id="users" class="col-lg-2 users">
+
+    </div>
+    <div class="col-lg-10 chatWindow">
+      <div class="row chats">
+        <div id="chat">
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-group message">
+          <input type="text" id="messagetext" class="form-control" placeholder="Say something...">
+          <span class="input-group-btn">
+            <button id="btn" class="btn btn-default" type="button">Go!</button>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/javascripts/jquery-3.1.1.min.js"></script>
+  <script src="/javascripts/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js"></script>
+  <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+  <script>
+
+    $(function(){
+      var socket = io.connect();
+      var $btn = $('#btn');
+      var $messagetext = $('#messagetext');
+      var $chats = $('.chat');
+      var $chat = $('#chat');
+      var $users = $('#users');
+
+      // Dialog box prompt for username
+      bootbox.prompt({
+          title: "Please enter a username",
+          inputType: 'text',
+          size: 'small',
+          callback: function (result) {
+            socket.emit('new user', result, function(data){
+              if(data){
+                console.log(data);
+              } else {
+                bootbox.alert({
+                    message: "Username taken!",
+                    size: 'small'
+                });
+                location.reload();
+              }
+            });
+          }
+      });
+
+      // Send message on button click
+      $btn.click(function(e){
+        e.preventDefault();
+        socket.emit('send message', $messagetext.val());
+        $messagetext.val('');
+      });
+
+      // Send message on pressing enter
+      $('#messagetext').keypress(function (e) {
+       var key = e.which;
+       if(key == 13)  // the enter key code
+        {
+          $('#btn').click();
+          return false;
+        }
+      });
+
+      // Update username list when new user joins
+      socket.on('usernames', function(data){
+        var html = '';
+        console.log(data[0]);
+        for (var i = 0; i < data.length; i++) {
+          html += '<div class="row user"><strong>' + data[i] + '<strong></div>';
+        }
+        console.log($users);
+        console.log($chats);
+        console.log($chat);
+
+        $users.html(html);
+      });
+
+      // Update chat list on new message
+      socket.on('new message', function(data){
+        $chat.append('<strong>'+data.user+'</strong>: '+data.msg+'<br>');
+        $chat.animate({scrollTop: $chat.get(0).scrollHeight}, 2000);
+      });
+    });
+  </script>
+</body>
+</html>

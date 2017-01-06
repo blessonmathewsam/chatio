@@ -1,0 +1,21 @@
+{
+  "name": "chatio",
+  "version": "1.0.0",
+  "description": "Simple Chat App",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Blesson Mathew Sam",
+  "license": "ISC",
+  "dependencies": {
+    "express": "*",
+    "gulp": "^3.9.1",
+    "gulp-less": "^3.3.0",
+    "gulp-live-server": "0.0.30",
+    "socket.io": "*"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.18.0"
+  }
+}
